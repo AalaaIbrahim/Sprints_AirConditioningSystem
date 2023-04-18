@@ -53,6 +53,8 @@ C_SRCS +=  \
 ../ECUAL/buzzer/buzzer.c \
 ../ECUAL/htimer0/htimer0.c \
 ../ECUAL/keypad/keypad.c \
+../ECUAL/lcd/lcd_config.c \
+../ECUAL/lcd/lcd_program.c \
 ../ECUAL/temp_sensor/temp_sensor.c \
 ../main.c \
 ../MCAL/adc/adc_program.c \
@@ -71,6 +73,8 @@ APP/app.o \
 ECUAL/buzzer/buzzer.o \
 ECUAL/htimer0/htimer0.o \
 ECUAL/keypad/keypad.o \
+ECUAL/lcd/lcd_config.o \
+ECUAL/lcd/lcd_program.o \
 ECUAL/temp_sensor/temp_sensor.o \
 main.o \
 MCAL/adc/adc_program.o \
@@ -82,6 +86,8 @@ APP/app.o \
 ECUAL/buzzer/buzzer.o \
 ECUAL/htimer0/htimer0.o \
 ECUAL/keypad/keypad.o \
+ECUAL/lcd/lcd_config.o \
+ECUAL/lcd/lcd_program.o \
 ECUAL/temp_sensor/temp_sensor.o \
 main.o \
 MCAL/adc/adc_program.o \
@@ -93,6 +99,8 @@ APP/app.d \
 ECUAL/buzzer/buzzer.d \
 ECUAL/htimer0/htimer0.d \
 ECUAL/keypad/keypad.d \
+ECUAL/lcd/lcd_config.d \
+ECUAL/lcd/lcd_program.d \
 ECUAL/temp_sensor/temp_sensor.d \
 main.d \
 MCAL/adc/adc_program.d \
@@ -104,6 +112,8 @@ APP/app.d \
 ECUAL/buzzer/buzzer.d \
 ECUAL/htimer0/htimer0.d \
 ECUAL/keypad/keypad.d \
+ECUAL/lcd/lcd_config.d \
+ECUAL/lcd/lcd_program.d \
 ECUAL/temp_sensor/temp_sensor.d \
 main.d \
 MCAL/adc/adc_program.d \
@@ -146,6 +156,20 @@ ECUAL/htimer0/htimer0.o: ../ECUAL/htimer0/htimer0.c
 	
 
 ECUAL/keypad/keypad.o: ../ECUAL/keypad/keypad.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32a -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega32a" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+ECUAL/lcd/lcd_config.o: ../ECUAL/lcd/lcd_config.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32a -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega32a" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+ECUAL/lcd/lcd_program.o: ../ECUAL/lcd/lcd_program.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32a -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega32a" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

@@ -10,6 +10,10 @@ ECUAL\htimer0\htimer0.c
 
 ECUAL\keypad\keypad.c
 
+ECUAL\lcd\lcd_config.c
+
+ECUAL\lcd\lcd_program.c
+
 ECUAL\temp_sensor\temp_sensor.c
 
 main.c

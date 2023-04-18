@@ -189,9 +189,6 @@
     <Compile Include="MCAL\adc\adc_program.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="MCAL\adc\adc_register.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="MCAL\dio\dio_config.h">
       <SubType>compile</SubType>
     </Compile>

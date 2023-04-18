@@ -8,9 +8,9 @@
 #ifndef MCAL_ADC_ADC_INTERFACE_H_
 #define MCAL_ADC_ADC_INTERFACE_H_
 
-#include "../../MCAL/MCU_CFG/MCU_Interface.h"
-#include "../../SERVICES/STD_Types.h"
-#include "../../SERVICES/BIT_Math.h"
+//#include "../../MCAL/MCU_CFG/MCU_Interface.h"
+#include "../../Common/STD_Types.h"
+#include "../../Common/BIT_Math.h"
 #include "ADC_private.h"
 #include "ADC_config.h"
 
