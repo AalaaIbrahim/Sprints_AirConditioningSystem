@@ -156,6 +156,18 @@
     <Compile Include="ECUAL\keypad\keypad.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="ECUAL\lcd\lcd_config.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ECUAL\lcd\lcd_config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ECUAL\lcd\lcd_interface.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ECUAL\lcd\lcd_program.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="ECUAL\temp_sensor\temp_sensor.c">
       <SubType>compile</SubType>
     </Compile>

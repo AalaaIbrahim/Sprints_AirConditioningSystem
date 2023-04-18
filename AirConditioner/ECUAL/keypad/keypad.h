@@ -2,7 +2,7 @@
  * keypad.h
  *
  * Created: 4/17/2023 4:06:37 AM
- *  Author: Sharpel
+ *  Author: ME
  */ 
 
 
@@ -20,10 +20,10 @@
 #define C2     DIO_PINC_6
 #define C3     DIO_PINC_7
 
+//#define KEYPAD_PORT *PORTC_REG
+//#define KEYPAD_DIR  *DDRC_REG
+//#define KEYPAD_PIN  *PINC_REG
 
-//#define KEYPAD_PORT PORTC
-//#define KEYPAD_DIR  DDRC
-//#define KEYPAD_PIN  PINC
 
 /*************************************************************************************************************
  * 											User-defined data types
@@ -41,7 +41,7 @@ typedef enum EN_KEYPAD_BTNS
 	KEY_9,
 	KEY_NOTHING
 	
-	}EN_KEYPAD_BTNS;
+}EN_KEYPAD_BTNS;
 
 /*************************************************************************************************************
  * 											  Function Prototypes
@@ -79,12 +79,5 @@ EN_KEYPAD_BTNS KEYPAD_GetButton(void);
 EN_KEYPAD_BTNS KEYPAD_checkR1(void);
 EN_KEYPAD_BTNS KEYPAD_checkR2(void);
 EN_KEYPAD_BTNS KEYPAD_checkR3(void);
+
 #endif /* KEYPAD_H_ */
-
-
-
-
-
-
-
-
