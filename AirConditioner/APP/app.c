@@ -1,6 +1,7 @@
 /*************************************************************************************************************
 * 													Includes
 ************************************************************************************************************/
+#include <util/delay.h>
 #include "../Common/STD_Types.h"
 #include "../Common/BIT_Math.h"
 #include "../Common/vect_table.h"
@@ -17,7 +18,7 @@
 ************************************************************************************************************/
 extern st_Buzzer_t st_g_Buzzer;
 extern st_TempSensor_t st_g_TempSensor;
-extern Uchar8_t arr_g_bell;
+extern Uchar8_t arr_g_bell[8];
 
 Uchar8_t u8_g_tempValue = DEFAULT_TEMP;
 Uchar8_t u8_g_setFlag = 0;
@@ -33,6 +34,7 @@ void lcdFlag(void);
 ************************************************************************************************************/
 void APP_Init(void)
 {
+	
 	/* Initialize used modules */
 	HLCD_vidInit();
 	KEYPAD_init();
@@ -58,7 +60,9 @@ void APP_Init(void)
 	HLCD_WriteString("Pick temperature");
 	TIM0_SyncDelay(500, mSeconds);
 
+//	SET_BIT(SREG_REG,7);
 	APP_adjustInit();
+	
 }
 
 static void APP_adjustInit(void)
@@ -164,37 +168,37 @@ void APP_Start(void)
 		}
 	}
 	
-	TSENSOR_ReadValue(&st_g_TempSensor, &f32_l_CurrentTemp);
-	
-	if(lcdDelay == 0)
-	{
+
 		lcdDelay = 1;
+		TSENSOR_ReadValue(&st_g_TempSensor, &f32_l_CurrentTemp);
+		//TIM0_AsyncDelay(500, mSeconds,lcdFlag);	
+
 	
-		if(f32_l_CurrentTemp > u8_g_tempValue && u8_g_setFlag)
-		{
-			HLCD_gotoXY(0,0);
-			HLCD_vidWriteChar(1);
-			HLCD_WriteString("Current temp ");
-			HLCD_WriteInt(f32_l_CurrentTemp);
-			BUZ_SetState(&st_g_Buzzer, BUZ_ON);
+	if(f32_l_CurrentTemp > u8_g_tempValue && u8_g_setFlag)
+	{
+		HLCD_gotoXY(0,0);
+		HLCD_vidWriteChar(1);
+		HLCD_WriteString("Current temp ");
+		HLCD_WriteInt(f32_l_CurrentTemp);
+		BUZ_SetState(&st_g_Buzzer, BUZ_ON);
 		
-			HLCD_gotoXY(0,14);
-			HLCD_WriteInt(f32_l_CurrentTemp);
-		}
-		else if(u8_g_setFlag)
-		{
-			BUZ_SetState(&st_g_Buzzer, BUZ_OFF);
-			HLCD_gotoXY(0,0);
-			HLCD_WriteString("Current temp: ");
-			HLCD_WriteInt(f32_l_CurrentTemp);
-		}
-	
-		TIM0_AsyncDelay(500, mSeconds,lcdFlag);
+		HLCD_gotoXY(0,14);
+		HLCD_WriteInt(f32_l_CurrentTemp);
 	}
+	else if(u8_g_setFlag)
+	{
+		BUZ_SetState(&st_g_Buzzer, BUZ_OFF);
+		HLCD_gotoXY(0,0);
+		HLCD_WriteString("Current temp: ");
+		HLCD_WriteInt(f32_l_CurrentTemp);
+	}
+	
+	
+	
 }
 
 
 void lcdFlag(void)
 {
-	lcdDelay = 0;	
+	lcdDelay = 0;
 }

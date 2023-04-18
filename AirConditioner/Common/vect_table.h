@@ -38,6 +38,8 @@
 #define sei() __asm__ __volatile__ ("sei" ::: "memory")			/* Sets Global Interrupt Enable Bit   */
 #define cli() __asm__ __volatile__ ("cli" ::: "memory")			/* Clears Global Interrupt Enable Bit */
 
+#define SREG_REG	*((VUchar8_t *)0x5F)
+
 
 #define ISR(INT_VECT)			void INT_VECT(void) __attribute__((signal,used));\
 void INT_VECT(void)

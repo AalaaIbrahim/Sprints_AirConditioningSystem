@@ -120,5 +120,6 @@ en_TIMErrorState_t TIM0_GetState(en_TIMState_t* u8_a_State);
 en_TIMErrorState_t TIM0_SetOVFCallback(void (*pv_a_CallbackFn)(void));
 
 void TIM0_EnableInterrupt(void);
+void TIM0_DisableInterrupt(void);
 
 #endif

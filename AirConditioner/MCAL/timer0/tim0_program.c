@@ -131,4 +131,8 @@ void TIM0_EnableInterrupt(void)
 	SET_BIT(TIMSK, TIMSK_TOIE0);
 }
 
+void TIM0_DisableInterrupt(void)
+{
+	CLEAR_BIT(TIMSK, TIMSK_TOIE0);
+}
 

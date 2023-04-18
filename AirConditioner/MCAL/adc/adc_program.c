@@ -7,9 +7,10 @@
 /*************************************************************************************************************
  * 													Includes
  ************************************************************************************************************/
+
 #include "../../Common/STD_Types.h"
 #include "../../Common/BIT_Math.h"
-//#include "../../Common/vect_table.h"
+#include "../../Common/vect_table.h"
 
 //#include "adc_register.h"
 #include "adc_private.h"
@@ -22,7 +23,9 @@
  * 												Global Variables
  ************************************************************************************************************/
 ST_ADC_CFG_t st_g_ADC_Config = {NULL, AVCC_EXTERNAL_CAPACITOR, ADC_RIGHT_ADJUST_RESULT, ADC_DIV64, ADC_FLAG_POLLING};
+	
 
+//void (*ADC_CallbakcFn)(void) = NULL;
 /*************************************************************************************************************
  * 											Function Implementation
  ************************************************************************************************************/
@@ -190,3 +193,30 @@ Std_ReturnType ADC_Conversion(const ST_ADC_CFG_t *_adc , Uint16_t *_ConversionRe
 
 	return ret;
 }
+
+//Std_ReturnType ADC_AsyncConversion(const ST_ADC_CFG_t *_adc , Uint16_t *_ConversionResult , EN_ADC_CHANNEL_SELECTION_t _channel, void (*Callback)(void))
+//{
+	//Std_ReturnType ret = E_NOT_OK;
+//
+	//if(NULL == _adc || NULL == _ConversionResult)
+	//{
+		//ret = E_NOT_OK;
+	//}
+	//else
+	//{
+		////ADC_CallbakcFn = Callback; 
+		//ADC_Init(_adc);
+		//ADC_SetChannel(_adc,_channel);
+		//ADC_StartConversion(_adc);
+//
+		//ret = E_OK;
+	//}
+//
+	//return ret;
+//}
+//
+//ISR(ADC_INT)
+//{
+	//ADC_GetConversionResult(_adc,_ConversionResult);
+	//ADC_CallbakcFn();
+//}
