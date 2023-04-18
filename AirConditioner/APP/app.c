@@ -171,6 +171,8 @@ void APP_Start(void)
 
 		lcdDelay = 1;
 		TSENSOR_ReadValue(&st_g_TempSensor, &f32_l_CurrentTemp);
+		if(f32_l_CurrentTemp-(Uint32_t)f32_l_CurrentTemp >= 0.5) f32_l_CurrentTemp = (Uint32_t)f32_l_CurrentTemp+1;
+		else f32_l_CurrentTemp = (Uint32_t)f32_l_CurrentTemp;
 		//TIM0_AsyncDelay(500, mSeconds,lcdFlag);	
 
 	
