@@ -13,17 +13,17 @@
 /*************************************************************************************************************
  * 													Macros
  ************************************************************************************************************/
-#define R1     2
-#define R2     3
-#define R3     4
-#define C1     5
-#define C2     6
-#define C3     7
+#define R1     DIO_PINC_2
+#define R2     DIO_PINC_3
+#define R3     DIO_PINC_4
+#define C1     DIO_PINC_5
+#define C2     DIO_PINC_6
+#define C3     DIO_PINC_7
 
 
-#define KEYPAD_PORT PORTC
-#define KEYPAD_DIR  DDRC
-#define KEYPAD_PIN  PINC
+//#define KEYPAD_PORT PORTC
+//#define KEYPAD_DIR  DDRC
+//#define KEYPAD_PIN  PINC
 
 /*************************************************************************************************************
  * 											User-defined data types
