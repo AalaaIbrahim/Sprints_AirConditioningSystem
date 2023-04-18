@@ -21,7 +21,7 @@
 /*************************************************************************************************************
  * 												Global Variables
  ************************************************************************************************************/
-ST_ADC_CFG_t st_g_ADC_Config = {NULL, AVCC_EXTERNAL_CAPACITOR, ADC_RIGHT_ADJUST_RESULT, ADC_DIV2, ADC_FLAG_POLLING};
+ST_ADC_CFG_t st_g_ADC_Config = {NULL, AVCC_EXTERNAL_CAPACITOR, ADC_RIGHT_ADJUST_RESULT, ADC_DIV64, ADC_FLAG_POLLING};
 
 /*************************************************************************************************************
  * 											Function Implementation

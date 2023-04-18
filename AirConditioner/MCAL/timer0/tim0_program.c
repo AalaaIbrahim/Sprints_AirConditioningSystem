@@ -126,6 +126,9 @@ en_TIMErrorState_t TIM0_GetState(en_TIMState_t* u8_a_State)
 }
 
 
-
+void TIM0_EnableInterrupt(void)
+{
+	SET_BIT(TIMSK, TIMSK_TOIE0);
+}
 
 

@@ -24,6 +24,10 @@ Uchar8_t u8_g_setFlag = 0;
 Uchar8_t u8_g_CursorPosition = 0;
 
 float32_t f32_l_CurrentTemp = 0;
+
+Uchar8_t lcdDelay = 0;
+
+void lcdFlag(void);
 /*************************************************************************************************************
 * 											Function Implementation
 ************************************************************************************************************/
@@ -162,23 +166,35 @@ void APP_Start(void)
 	
 	TSENSOR_ReadValue(&st_g_TempSensor, &f32_l_CurrentTemp);
 	
-	if(f32_l_CurrentTemp > u8_g_tempValue && u8_g_setFlag)
+	if(lcdDelay == 0)
 	{
-		HLCD_gotoXY(0,0);
-		HLCD_vidWriteChar(1);
-		HLCD_WriteString("Current temp ");
-		HLCD_WriteInt(f32_l_CurrentTemp);
-		BUZ_SetState(&st_g_Buzzer, BUZ_ON);
+		lcdDelay = 1;
+	
+		if(f32_l_CurrentTemp > u8_g_tempValue && u8_g_setFlag)
+		{
+			HLCD_gotoXY(0,0);
+			HLCD_vidWriteChar(1);
+			HLCD_WriteString("Current temp ");
+			HLCD_WriteInt(f32_l_CurrentTemp);
+			BUZ_SetState(&st_g_Buzzer, BUZ_ON);
 		
-		HLCD_gotoXY(0,14);
-		HLCD_WriteInt(f32_l_CurrentTemp);
+			HLCD_gotoXY(0,14);
+			HLCD_WriteInt(f32_l_CurrentTemp);
+		}
+		else if(u8_g_setFlag)
+		{
+			BUZ_SetState(&st_g_Buzzer, BUZ_OFF);
+			HLCD_gotoXY(0,0);
+			HLCD_WriteString("Current temp: ");
+			HLCD_WriteInt(f32_l_CurrentTemp);
+		}
+	
+		TIM0_AsyncDelay(500, mSeconds,lcdFlag);
 	}
-	else if(u8_g_setFlag)
-	{
-		BUZ_SetState(&st_g_Buzzer, BUZ_OFF);
-		HLCD_gotoXY(0,0);
-		HLCD_WriteString("Current temp: ");
-		HLCD_WriteInt(f32_l_CurrentTemp);
-	}
+}
 
+
+void lcdFlag(void)
+{
+	lcdDelay = 0;	
 }
