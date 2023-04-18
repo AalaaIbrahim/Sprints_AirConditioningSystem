@@ -9,8 +9,6 @@
 #define MCAL_DIO_DIO_INTERFACE_H_
 
 
-#include "../../Common/std_types.h"
-
 #define E_OK	0
 #define E_NOK	-1
 
@@ -86,14 +84,14 @@ typedef enum
 }enu_val;
 
 
-Sint8_t DIO_s8SETPortDir(enu_port enPortCopy,  enu_dir enPortDir);
-Sint8_t DIO_s8SETPortVal(enu_port enPortCopy,  Uint8_t u8PortVal);
-Sint8_t DIO_s8GETPortVal(enu_port enPortCopy,  Uint8_t* pu8Val);
+Uchar8_t DIO_s8SETPortDir(enu_port enPortCopy,  enu_dir enPortDir);
+Uchar8_t DIO_s8SETPortVal(enu_port enPortCopy,  Uchar8_t u8PortVal);
+Uchar8_t DIO_s8GETPortVal(enu_port enPortCopy,  Uchar8_t* pu8Val);
 
-Sint8_t DIO_s8SETPinDir (enu_pin enPinCopy, enu_dir enPortDir);
-Sint8_t DIO_s8SETPinVal (enu_pin enPinCopy, enu_val enPortVal);
-Sint8_t DIO_s8TOGPinVal (enu_pin enPinCopy);
-Sint8_t DIO_s8GETPinVal (enu_pin enPinCopy, Uint8_t* pu8Val);
+Uchar8_t DIO_s8SETPinDir (enu_pin enPinCopy, enu_dir enPortDir);
+Uchar8_t DIO_s8SETPinVal (enu_pin enPinCopy, enu_val enPortVal);
+Uchar8_t DIO_s8TOGPinVal (enu_pin enPinCopy);
+Uchar8_t DIO_s8GETPinVal (enu_pin enPinCopy, Uchar8_t* pu8Val);
 
 
-#endif /* 04_MCAL_DIO_DIO_INTERFACE_H_ */
+#endif /* MCAL_DIO_DIO_INTERFACE_H_ */
