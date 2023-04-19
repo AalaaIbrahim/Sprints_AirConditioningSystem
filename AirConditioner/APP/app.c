@@ -51,14 +51,14 @@ void APP_Init(void)
 	/* Display welcome message for one second */
 	HLCD_gotoXY(0, 4);
 	HLCD_WriteString("Welcome!");
-	TIM0_SyncDelay(1, Seconds);
+	HTIM0_SyncDelay(1, Seconds);
 	HLCD_ClrDisplay();
 	
 	/* Display Default Temperature */
 	HLCD_WriteString(" Default temp:");
 	HLCD_gotoXY(1, 7);
 	HLCD_WriteInt(DEFAULT_TEMP);
-	TIM0_SyncDelay(1, Seconds);
+	HTIM0_SyncDelay(1, Seconds);
 	HLCD_ClrDisplay();
 
 	APP_adjustInit();
@@ -75,7 +75,7 @@ static void APP_adjustInit(void)
 {
 	/* Ask user to enter temperature */
 	HLCD_WriteString("Pick temperature");
-	TIM0_SyncDelay(500, mSeconds);
+	HTIM0_SyncDelay(500, mSeconds);
 	HLCD_ClrDisplay();
 	
 	HLCD_WriteInt(MIN_TEMP);
@@ -94,7 +94,7 @@ static void APP_adjustInit(void)
 		u8_g_CursorPosition ++;
 	}
 
-	TIM0_AsyncDelay(5, Seconds, timeout);
+	HTIM0_AsyncDelay(TIME_OUT_SEC, Seconds, timeout);
 }
 
 /**
@@ -136,8 +136,8 @@ void APP_Start(void)
 				
 				//u8_g_CursorPosition++;
 				HLCD_vidWriteChar('|');
-				TIM0_AsyncEndDelay();
-				TIM0_AsyncDelay(5, Seconds, timeout);
+				HTIM0_AsyncEndDelay();
+				HTIM0_AsyncDelay(TIME_OUT_SEC, Seconds, timeout);
 			}
 			else
 			{
@@ -145,7 +145,7 @@ void APP_Start(void)
 				HLCD_WriteString("This Operation");
 				HLCD_gotoXY(1, 0);
 				HLCD_WriteString("is not allowed!");
-				TIM0_SyncDelay(500, mSeconds);
+				HTIM0_SyncDelay(500, mSeconds);
 
 				HLCD_ClrDisplay();
 			}
@@ -178,8 +178,8 @@ void APP_Start(void)
 				}
 				
 				/* Start new delay for timeout */
-				TIM0_AsyncEndDelay();
-				TIM0_AsyncDelay(5, Seconds, timeout);
+				HTIM0_AsyncEndDelay();
+				HTIM0_AsyncDelay(TIME_OUT_SEC, Seconds, timeout);
 			}
 			else
 			{
@@ -187,7 +187,7 @@ void APP_Start(void)
 				HLCD_WriteString("This Operation");
 				HLCD_gotoXY(1, 0);
 				HLCD_WriteString("is not allowed!");
-				TIM0_SyncDelay(500, mSeconds);
+				HTIM0_SyncDelay(500, mSeconds);
 
 				HLCD_ClrDisplay();
 			}
@@ -200,7 +200,7 @@ void APP_Start(void)
 				u8_g_setFlag = 1;
 				u8_g_SelectedValue = u8_g_tempValue;
 				HLCD_ClrDisplay();
-				TIM0_AsyncEndDelay();
+				HTIM0_AsyncEndDelay();
 			}
 			else
 			{
@@ -208,7 +208,7 @@ void APP_Start(void)
 				HLCD_WriteString("This Operation");
 				HLCD_gotoXY(1, 0);
 				HLCD_WriteString("is not allowed!");
-				TIM0_SyncDelay(500, mSeconds);
+				HTIM0_SyncDelay(500, mSeconds);
 
 				HLCD_ClrDisplay();
 			}
@@ -231,7 +231,7 @@ void APP_Start(void)
 			/* Break if no temperature is set or no timeout */
 			if(!u8_g_setFlag) break;
 			
-			u8_g_tempValue = DEFAULT_TEMP;
+			u8_g_SelectedValue = DEFAULT_TEMP;
 			break;
 		}
 	}
@@ -282,6 +282,6 @@ void timeout(void)
 	HLCD_ClrDisplay();
 	HLCD_gotoXY(0, 4);
 	HLCD_WriteString("Timeout!");
-	TIM0_SyncDelay(500, mSeconds);
+	HTIM0_SyncDelay(500, mSeconds);
 	HLCD_vidWritecmd(HLCD_DISPLAY_ON_CURSOR_OFF);
 }
