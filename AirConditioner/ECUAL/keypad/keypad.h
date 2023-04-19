@@ -20,10 +20,6 @@
 #define C2     DIO_PINC_6
 #define C3     DIO_PINC_7
 
-//#define KEYPAD_PORT *PORTC_REG
-//#define KEYPAD_DIR  *DDRC_REG
-//#define KEYPAD_PIN  *PINC_REG
-
 
 /*************************************************************************************************************
  * 											User-defined data types
