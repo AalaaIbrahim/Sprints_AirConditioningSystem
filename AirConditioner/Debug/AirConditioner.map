@@ -986,9 +986,9 @@ END GROUP
                                 0x46c (size before relaxing)
  .debug_str     0x000005bf      0x21e ECUAL/buzzer/buzzer.o
                                 0x41f (size before relaxing)
- .debug_str     0x000007dd      0x2e6 ECUAL/htimer0/htimer0.o
-                                0x4a7 (size before relaxing)
- .debug_str     0x00000ac3       0x49 ECUAL/keypad/keypad.o
+ .debug_str     0x000007dd      0x29c ECUAL/htimer0/htimer0.o
+                                0x4cf (size before relaxing)
+ .debug_str     0x00000a79       0x93 ECUAL/keypad/keypad.o
                                 0x415 (size before relaxing)
  .debug_str     0x00000b0c       0x3d ECUAL/lcd/lcd_config.o
                                 0x357 (size before relaxing)
@@ -1003,7 +1003,7 @@ END GROUP
  .debug_str     0x00001153      0x10f MCAL/dio/dio_prog.o
                                 0x478 (size before relaxing)
  .debug_str     0x00001262       0xfd MCAL/timer0/tim0_program.o
-                                0x415 (size before relaxing)
+                                0x43d (size before relaxing)
 
 .debug_loc      0x00000000     0x1da7
  *(.debug_loc)

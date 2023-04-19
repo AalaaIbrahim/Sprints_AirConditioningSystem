@@ -234,7 +234,7 @@ static void APP_adjustInit(void)
      166:	28 e5       	ldi	r18, 0x58	; 88
      168:	30 e0       	ldi	r19, 0x00	; 0
      16a:	42 e0       	ldi	r20, 0x02	; 2
-     16c:	6a e0       	ldi	r22, 0x0A	; 10
+     16c:	65 e0       	ldi	r22, 0x05	; 5
      16e:	70 e0       	ldi	r23, 0x00	; 0
      170:	80 e0       	ldi	r24, 0x00	; 0
      172:	90 e0       	ldi	r25, 0x00	; 0
@@ -439,7 +439,7 @@ void APP_Start(void)
      2b8:	28 e5       	ldi	r18, 0x58	; 88
      2ba:	30 e0       	ldi	r19, 0x00	; 0
      2bc:	42 e0       	ldi	r20, 0x02	; 2
-     2be:	6a e0       	ldi	r22, 0x0A	; 10
+     2be:	65 e0       	ldi	r22, 0x05	; 5
      2c0:	70 e0       	ldi	r23, 0x00	; 0
      2c2:	80 e0       	ldi	r24, 0x00	; 0
      2c4:	90 e0       	ldi	r25, 0x00	; 0
@@ -550,7 +550,7 @@ void APP_Start(void)
      370:	28 e5       	ldi	r18, 0x58	; 88
      372:	30 e0       	ldi	r19, 0x00	; 0
      374:	42 e0       	ldi	r20, 0x02	; 2
-     376:	6a e0       	ldi	r22, 0x0A	; 10
+     376:	65 e0       	ldi	r22, 0x05	; 5
      378:	70 e0       	ldi	r23, 0x00	; 0
      37a:	80 e0       	ldi	r24, 0x00	; 0
      37c:	90 e0       	ldi	r25, 0x00	; 0
@@ -875,6 +875,12 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      592:	08 95       	ret
 
 00000594 <HTIM0_SyncDelay>:
+extern Uchar8_t u8_g_TotalOVF;
+
+/*================================= Function Implementation =================================*/
+
+en_HTIMErrorState_t HTIM0_SyncDelay(Uint32_t u32_a_delay, en_timeUnits_t Copy_timeUnit)
+{
      594:	8f 92       	push	r8
      596:	9f 92       	push	r9
      598:	af 92       	push	r10
@@ -892,6 +898,12 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      5b0:	de b7       	in	r29, 0x3e	; 62
      5b2:	6b 01       	movw	r12, r22
      5b4:	7c 01       	movw	r14, r24
+	Uchar8_t u8_l_prescaler, Local_TotalOverFlows, Local_OverFlowCounter=0, u8_l_OverflowFlag, u8_l_TimState;
+	Uint16_t Local_TotalTicks;
+	float Local_TickTime;
+	
+	/* Get Value in micro seconds */
+	if(Copy_timeUnit == Seconds)	{u32_a_delay *= SEC_TO_uSEC;}
      5b6:	42 30       	cpi	r20, 0x02	; 2
      5b8:	59 f4       	brne	.+22     	; 0x5d0 <HTIM0_SyncDelay+0x3c>
      5ba:	9b 01       	movw	r18, r22
@@ -904,6 +916,7 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      5ca:	6b 01       	movw	r12, r22
      5cc:	7c 01       	movw	r14, r24
      5ce:	0d c0       	rjmp	.+26     	; 0x5ea <HTIM0_SyncDelay+0x56>
+	else if(Copy_timeUnit == mSeconds)	{u32_a_delay *= mSEC_TO_uSEC;}
      5d0:	41 30       	cpi	r20, 0x01	; 1
      5d2:	49 f4       	brne	.+18     	; 0x5e6 <HTIM0_SyncDelay+0x52>
      5d4:	a8 ee       	ldi	r26, 0xE8	; 232
@@ -914,8 +927,13 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      5e0:	6b 01       	movw	r12, r22
      5e2:	7c 01       	movw	r14, r24
      5e4:	02 c0       	rjmp	.+4      	; 0x5ea <HTIM0_SyncDelay+0x56>
+	else if(Copy_timeUnit == uSeconds)	{/* Do Nothing */}
      5e6:	41 11       	cpse	r20, r1
      5e8:	6b c0       	rjmp	.+214    	; 0x6c0 <HTIM0_SyncDelay+0x12c>
+	else return TIM_NOK;
+	
+	/* Set prescaler according to delay time */
+	if(u32_a_delay < MAX_CLK_DEV1_DELAY  )	{u8_l_prescaler = TIM_DIV_BY_1;}
      5ea:	88 e8       	ldi	r24, 0x88	; 136
      5ec:	c8 16       	cp	r12, r24
      5ee:	83 e1       	ldi	r24, 0x13	; 19
@@ -923,6 +941,7 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      5f2:	e1 04       	cpc	r14, r1
      5f4:	f1 04       	cpc	r15, r1
      5f6:	c8 f0       	brcs	.+50     	; 0x62a <HTIM0_SyncDelay+0x96>
+	else if(u32_a_delay < MAX_CLK_DEV8_DELAY  ) {u8_l_prescaler = TIM_DIV_BY_8;}
      5f8:	88 ea       	ldi	r24, 0xA8	; 168
      5fa:	c8 16       	cp	r12, r24
      5fc:	81 e6       	ldi	r24, 0x61	; 97
@@ -930,6 +949,7 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      600:	e1 04       	cpc	r14, r1
      602:	f1 04       	cpc	r15, r1
      604:	a0 f0       	brcs	.+40     	; 0x62e <HTIM0_SyncDelay+0x9a>
+	else if(u32_a_delay < MAX_CLK_DEV64_DELAY ) {u8_l_prescaler = TIM_DIV_BY_64;}
      606:	88 e4       	ldi	r24, 0x48	; 72
      608:	c8 16       	cp	r12, r24
      60a:	88 ee       	ldi	r24, 0xE8	; 232
@@ -938,6 +958,7 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      610:	e8 06       	cpc	r14, r24
      612:	f1 04       	cpc	r15, r1
      614:	70 f0       	brcs	.+28     	; 0x632 <HTIM0_SyncDelay+0x9e>
+	else if(u32_a_delay < MAX_CLK_DEV256_DELAY) {u8_l_prescaler = TIM_DIV_BY_256;}
      616:	80 e2       	ldi	r24, 0x20	; 32
      618:	c8 16       	cp	r12, r24
      61a:	81 ea       	ldi	r24, 0xA1	; 161
@@ -948,13 +969,25 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      624:	40 f4       	brcc	.+16     	; 0x636 <HTIM0_SyncDelay+0xa2>
      626:	14 e0       	ldi	r17, 0x04	; 4
      628:	07 c0       	rjmp	.+14     	; 0x638 <HTIM0_SyncDelay+0xa4>
+	else if(Copy_timeUnit == mSeconds)	{u32_a_delay *= mSEC_TO_uSEC;}
+	else if(Copy_timeUnit == uSeconds)	{/* Do Nothing */}
+	else return TIM_NOK;
+	
+	/* Set prescaler according to delay time */
+	if(u32_a_delay < MAX_CLK_DEV1_DELAY  )	{u8_l_prescaler = TIM_DIV_BY_1;}
      62a:	11 e0       	ldi	r17, 0x01	; 1
      62c:	05 c0       	rjmp	.+10     	; 0x638 <HTIM0_SyncDelay+0xa4>
+	else if(u32_a_delay < MAX_CLK_DEV8_DELAY  ) {u8_l_prescaler = TIM_DIV_BY_8;}
      62e:	12 e0       	ldi	r17, 0x02	; 2
      630:	03 c0       	rjmp	.+6      	; 0x638 <HTIM0_SyncDelay+0xa4>
+	else if(u32_a_delay < MAX_CLK_DEV64_DELAY ) {u8_l_prescaler = TIM_DIV_BY_64;}
      632:	13 e0       	ldi	r17, 0x03	; 3
      634:	01 c0       	rjmp	.+2      	; 0x638 <HTIM0_SyncDelay+0xa4>
+	else if(u32_a_delay < MAX_CLK_DEV256_DELAY) {u8_l_prescaler = TIM_DIV_BY_256;}
+	else {u8_l_prescaler = TIM_DIV_BY_1024;}
      636:	15 e0       	ldi	r17, 0x05	; 5
+	
+	Local_TickTime = arr_gs_prescalers[u8_l_prescaler-1]/TIM0_PRESCALER;
      638:	e1 2f       	mov	r30, r17
      63a:	f0 e0       	ldi	r31, 0x00	; 0
      63c:	31 97       	sbiw	r30, 0x01	; 1
@@ -964,17 +997,18 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      644:	fe 4f       	sbci	r31, 0xFE	; 254
      646:	60 81       	ld	r22, Z
      648:	71 81       	ldd	r23, Z+1	; 0x01
-     64a:	72 95       	swap	r23
-     64c:	62 95       	swap	r22
-     64e:	6f 70       	andi	r22, 0x0F	; 15
-     650:	67 27       	eor	r22, r23
-     652:	7f 70       	andi	r23, 0x0F	; 15
-     654:	67 27       	eor	r22, r23
+     64a:	76 95       	lsr	r23
+     64c:	67 95       	ror	r22
+     64e:	76 95       	lsr	r23
+     650:	67 95       	ror	r22
+     652:	76 95       	lsr	r23
+     654:	67 95       	ror	r22
      656:	80 e0       	ldi	r24, 0x00	; 0
      658:	90 e0       	ldi	r25, 0x00	; 0
      65a:	0e 94 d2 0a 	call	0x15a4	; 0x15a4 <__floatunsisf>
      65e:	4b 01       	movw	r8, r22
      660:	5c 01       	movw	r10, r24
+	Local_TotalTicks = (Uint16_t)(u32_a_delay/Local_TickTime);
      662:	c7 01       	movw	r24, r14
      664:	b6 01       	movw	r22, r12
      666:	0e 94 d2 0a 	call	0x15a4	; 0x15a4 <__floatunsisf>
@@ -983,36 +1017,97 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      66e:	0e 94 31 0a 	call	0x1462	; 0x1462 <__divsf3>
      672:	0e 94 a3 0a 	call	0x1546	; 0x1546 <__fixunssfsi>
      676:	f6 2e       	mov	r15, r22
+	Local_TotalOverFlows = Local_TotalTicks/TIM0_MAX_TICKS;
      678:	07 2f       	mov	r16, r23
+	
+	/* Initialize timer in normal mode */
+	TIM0_voidInit(NormalMode);
      67a:	80 e0       	ldi	r24, 0x00	; 0
      67c:	0e 94 23 09 	call	0x1246	; 0x1246 <TIM0_voidInit>
+	
+	/* Set timer start value */
+	TIM0_SetValue(TIM0_MAX_TICKS-(Local_TotalTicks%TIM0_MAX_TICKS));
      680:	8f 2d       	mov	r24, r15
      682:	81 95       	neg	r24
      684:	0e 94 54 09 	call	0x12a8	; 0x12a8 <TIM0_SetValue>
+	
+	/* Start Timer */
+	TIM0_Start(u8_l_prescaler);
      688:	81 2f       	mov	r24, r17
      68a:	0e 94 3c 09 	call	0x1278	; 0x1278 <TIM0_Start>
+
+/*================================= Function Implementation =================================*/
+
+en_HTIMErrorState_t HTIM0_SyncDelay(Uint32_t u32_a_delay, en_timeUnits_t Copy_timeUnit)
+{
+	Uchar8_t u8_l_prescaler, Local_TotalOverFlows, Local_OverFlowCounter=0, u8_l_OverflowFlag, u8_l_TimState;
      68e:	10 e0       	ldi	r17, 0x00	; 0
+	TIM0_SetValue(TIM0_MAX_TICKS-(Local_TotalTicks%TIM0_MAX_TICKS));
+	
+	/* Start Timer */
+	TIM0_Start(u8_l_prescaler);
+	
+	while(Local_OverFlowCounter <= Local_TotalOverFlows)
      690:	11 c0       	rjmp	.+34     	; 0x6b4 <HTIM0_SyncDelay+0x120>
+	{
+		/* Wait until the overflow flag is raised */
+		do
+		{
+			TIM0_GetOVF(&u8_l_OverflowFlag);
      692:	ce 01       	movw	r24, r28
      694:	01 96       	adiw	r24, 0x01	; 1
      696:	0e 94 56 09 	call	0x12ac	; 0x12ac <TIM0_GetOVF>
+			TIM0_GetState(&u8_l_TimState);
      69a:	ce 01       	movw	r24, r28
      69c:	02 96       	adiw	r24, 0x02	; 2
      69e:	0e 94 64 09 	call	0x12c8	; 0x12c8 <TIM0_GetState>
+		}
+		while(!u8_l_OverflowFlag && u8_l_TimState);
      6a2:	89 81       	ldd	r24, Y+1	; 0x01
      6a4:	81 11       	cpse	r24, r1
      6a6:	03 c0       	rjmp	.+6      	; 0x6ae <HTIM0_SyncDelay+0x11a>
      6a8:	8a 81       	ldd	r24, Y+2	; 0x02
      6aa:	81 11       	cpse	r24, r1
      6ac:	f2 cf       	rjmp	.-28     	; 0x692 <HTIM0_SyncDelay+0xfe>
+		
+		/* Clear the overflow flag */
+		TIM0_ClearOVF();
      6ae:	0e 94 60 09 	call	0x12c0	; 0x12c0 <TIM0_ClearOVF>
+		
+		Local_OverFlowCounter++;
      6b2:	1f 5f       	subi	r17, 0xFF	; 255
+	TIM0_SetValue(TIM0_MAX_TICKS-(Local_TotalTicks%TIM0_MAX_TICKS));
+	
+	/* Start Timer */
+	TIM0_Start(u8_l_prescaler);
+	
+	while(Local_OverFlowCounter <= Local_TotalOverFlows)
      6b4:	01 17       	cp	r16, r17
      6b6:	68 f7       	brcc	.-38     	; 0x692 <HTIM0_SyncDelay+0xfe>
+		TIM0_ClearOVF();
+		
+		Local_OverFlowCounter++;
+	}
+	
+	TIM0_Stop();
      6b8:	0e 94 4a 09 	call	0x1294	; 0x1294 <TIM0_Stop>
+	
+	return TIM_OK;
      6bc:	80 e0       	ldi	r24, 0x00	; 0
      6be:	01 c0       	rjmp	.+2      	; 0x6c2 <HTIM0_SyncDelay+0x12e>
+	
+	/* Get Value in micro seconds */
+	if(Copy_timeUnit == Seconds)	{u32_a_delay *= SEC_TO_uSEC;}
+	else if(Copy_timeUnit == mSeconds)	{u32_a_delay *= mSEC_TO_uSEC;}
+	else if(Copy_timeUnit == uSeconds)	{/* Do Nothing */}
+	else return TIM_NOK;
      6c0:	81 e0       	ldi	r24, 0x01	; 1
+	}
+	
+	TIM0_Stop();
+	
+	return TIM_OK;
+}
      6c2:	0f 90       	pop	r0
      6c4:	0f 90       	pop	r0
      6c6:	df 91       	pop	r29
@@ -1030,6 +1125,9 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      6de:	08 95       	ret
 
 000006e0 <HTIM0_AsyncDelay>:
+
+en_HTIMErrorState_t HTIM0_AsyncDelay(Uint32_t u32_a_delay, en_timeUnits_t u8_a_timeUnit, void (*Copy_pvCallbackFn)(void))
+{
      6e0:	4f 92       	push	r4
      6e2:	5f 92       	push	r5
      6e4:	6f 92       	push	r6
@@ -1051,13 +1149,23 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      704:	7c 01       	movw	r14, r24
      706:	14 2f       	mov	r17, r20
      708:	49 01       	movw	r8, r18
+	Uchar8_t u8_l_prescaler, u8_l_TimState;
+	Uint16_t u8_l_TotalTicks;
+	float Local_TickTime;
+	
+	/* Check whether timer is Idle or Busy */
+	TIM0_GetState(&u8_l_TimState);
      70a:	ce 01       	movw	r24, r28
      70c:	01 96       	adiw	r24, 0x01	; 1
      70e:	0e 94 64 09 	call	0x12c8	; 0x12c8 <TIM0_GetState>
+	if(u8_l_TimState == TIM0_RUNNING) return TIM_NOK;
      712:	89 81       	ldd	r24, Y+1	; 0x01
      714:	81 30       	cpi	r24, 0x01	; 1
      716:	09 f4       	brne	.+2      	; 0x71a <HTIM0_AsyncDelay+0x3a>
      718:	7c c0       	rjmp	.+248    	; 0x812 <__DATA_REGION_LENGTH__+0x12>
+	
+	/* Get Value in micro seconds */
+	if(u8_a_timeUnit == Seconds)	{u32_a_delay *= SEC_TO_uSEC;}
      71a:	12 30       	cpi	r17, 0x02	; 2
      71c:	59 f4       	brne	.+22     	; 0x734 <HTIM0_AsyncDelay+0x54>
      71e:	a7 01       	movw	r20, r14
@@ -1070,6 +1178,7 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      72e:	6b 01       	movw	r12, r22
      730:	7c 01       	movw	r14, r24
      732:	0d c0       	rjmp	.+26     	; 0x74e <HTIM0_AsyncDelay+0x6e>
+	else if(u8_a_timeUnit == mSeconds)	{u32_a_delay *= mSEC_TO_uSEC;}
      734:	11 30       	cpi	r17, 0x01	; 1
      736:	49 f4       	brne	.+18     	; 0x74a <HTIM0_AsyncDelay+0x6a>
      738:	a8 ee       	ldi	r26, 0xE8	; 232
@@ -1080,8 +1189,13 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      744:	6b 01       	movw	r12, r22
      746:	7c 01       	movw	r14, r24
      748:	02 c0       	rjmp	.+4      	; 0x74e <HTIM0_AsyncDelay+0x6e>
+	else if(u8_a_timeUnit == uSeconds)	{/* Do Nothing */}
      74a:	11 11       	cpse	r17, r1
      74c:	64 c0       	rjmp	.+200    	; 0x816 <__DATA_REGION_LENGTH__+0x16>
+	else return TIM_NOK;
+	
+	/* Set prescaler according to delay time */
+	if(u32_a_delay < MAX_CLK_DEV1_DELAY  )	{u8_l_prescaler = TIM_DIV_BY_1;}
      74e:	88 e8       	ldi	r24, 0x88	; 136
      750:	c8 16       	cp	r12, r24
      752:	83 e1       	ldi	r24, 0x13	; 19
@@ -1089,6 +1203,7 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      756:	e1 04       	cpc	r14, r1
      758:	f1 04       	cpc	r15, r1
      75a:	d8 f0       	brcs	.+54     	; 0x792 <HTIM0_AsyncDelay+0xb2>
+	else if(u32_a_delay < MAX_CLK_DEV8_DELAY  ) {u8_l_prescaler = TIM_DIV_BY_8;}
      75c:	88 ea       	ldi	r24, 0xA8	; 168
      75e:	c8 16       	cp	r12, r24
      760:	81 e6       	ldi	r24, 0x61	; 97
@@ -1096,6 +1211,7 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      764:	e1 04       	cpc	r14, r1
      766:	f1 04       	cpc	r15, r1
      768:	b8 f0       	brcs	.+46     	; 0x798 <HTIM0_AsyncDelay+0xb8>
+	else if(u32_a_delay < MAX_CLK_DEV64_DELAY ) {u8_l_prescaler = TIM_DIV_BY_64;}
      76a:	88 e4       	ldi	r24, 0x48	; 72
      76c:	c8 16       	cp	r12, r24
      76e:	88 ee       	ldi	r24, 0xE8	; 232
@@ -1104,6 +1220,7 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      774:	e8 06       	cpc	r14, r24
      776:	f1 04       	cpc	r15, r1
      778:	98 f0       	brcs	.+38     	; 0x7a0 <HTIM0_AsyncDelay+0xc0>
+	else if(u32_a_delay < MAX_CLK_DEV256_DELAY) {u8_l_prescaler = TIM_DIV_BY_256;}
      77a:	80 e2       	ldi	r24, 0x20	; 32
      77c:	c8 16       	cp	r12, r24
      77e:	81 ea       	ldi	r24, 0xA1	; 161
@@ -1116,22 +1233,34 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      78c:	bb 24       	eor	r11, r11
      78e:	b2 f8       	bld	r11, 2
      790:	10 c0       	rjmp	.+32     	; 0x7b2 <HTIM0_AsyncDelay+0xd2>
+	else if(u8_a_timeUnit == mSeconds)	{u32_a_delay *= mSEC_TO_uSEC;}
+	else if(u8_a_timeUnit == uSeconds)	{/* Do Nothing */}
+	else return TIM_NOK;
+	
+	/* Set prescaler according to delay time */
+	if(u32_a_delay < MAX_CLK_DEV1_DELAY  )	{u8_l_prescaler = TIM_DIV_BY_1;}
      792:	bb 24       	eor	r11, r11
      794:	b3 94       	inc	r11
      796:	0d c0       	rjmp	.+26     	; 0x7b2 <HTIM0_AsyncDelay+0xd2>
+	else if(u32_a_delay < MAX_CLK_DEV8_DELAY  ) {u8_l_prescaler = TIM_DIV_BY_8;}
      798:	68 94       	set
      79a:	bb 24       	eor	r11, r11
      79c:	b1 f8       	bld	r11, 1
      79e:	09 c0       	rjmp	.+18     	; 0x7b2 <HTIM0_AsyncDelay+0xd2>
+	else if(u32_a_delay < MAX_CLK_DEV64_DELAY ) {u8_l_prescaler = TIM_DIV_BY_64;}
      7a0:	0f 2e       	mov	r0, r31
      7a2:	f3 e0       	ldi	r31, 0x03	; 3
      7a4:	bf 2e       	mov	r11, r31
      7a6:	f0 2d       	mov	r31, r0
      7a8:	04 c0       	rjmp	.+8      	; 0x7b2 <HTIM0_AsyncDelay+0xd2>
+	else if(u32_a_delay < MAX_CLK_DEV256_DELAY) {u8_l_prescaler = TIM_DIV_BY_256;}
+	else {u8_l_prescaler = TIM_DIV_BY_1024;}
      7aa:	0f 2e       	mov	r0, r31
      7ac:	f5 e0       	ldi	r31, 0x05	; 5
      7ae:	bf 2e       	mov	r11, r31
      7b0:	f0 2d       	mov	r31, r0
+	
+	Local_TickTime = arr_gs_prescalers[u8_l_prescaler-1]/TIM0_PRESCALER;
      7b2:	eb 2d       	mov	r30, r11
      7b4:	f0 e0       	ldi	r31, 0x00	; 0
      7b6:	31 97       	sbiw	r30, 0x01	; 1
@@ -1141,17 +1270,18 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      7be:	fe 4f       	sbci	r31, 0xFE	; 254
      7c0:	60 81       	ld	r22, Z
      7c2:	71 81       	ldd	r23, Z+1	; 0x01
-     7c4:	72 95       	swap	r23
-     7c6:	62 95       	swap	r22
-     7c8:	6f 70       	andi	r22, 0x0F	; 15
-     7ca:	67 27       	eor	r22, r23
-     7cc:	7f 70       	andi	r23, 0x0F	; 15
-     7ce:	67 27       	eor	r22, r23
+     7c4:	76 95       	lsr	r23
+     7c6:	67 95       	ror	r22
+     7c8:	76 95       	lsr	r23
+     7ca:	67 95       	ror	r22
+     7cc:	76 95       	lsr	r23
+     7ce:	67 95       	ror	r22
      7d0:	80 e0       	ldi	r24, 0x00	; 0
      7d2:	90 e0       	ldi	r25, 0x00	; 0
      7d4:	0e 94 d2 0a 	call	0x15a4	; 0x15a4 <__floatunsisf>
      7d8:	2b 01       	movw	r4, r22
      7da:	3c 01       	movw	r6, r24
+	u8_l_TotalTicks = (Uint16_t)(u32_a_delay/Local_TickTime);
      7dc:	c7 01       	movw	r24, r14
      7de:	b6 01       	movw	r22, r12
      7e0:	0e 94 d2 0a 	call	0x15a4	; 0x15a4 <__floatunsisf>
@@ -1160,20 +1290,54 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      7e8:	0e 94 31 0a 	call	0x1462	; 0x1462 <__divsf3>
      7ec:	0e 94 a3 0a 	call	0x1546	; 0x1546 <__fixunssfsi>
      7f0:	f6 2e       	mov	r15, r22
+	u8_g_TotalOVF = u8_l_TotalTicks/TIM0_MAX_TICKS;
      7f2:	70 93 46 01 	sts	0x0146, r23	; 0x800146 <u8_g_TotalOVF>
+	
+	/*Set the callback function */
+	TIM0_SetOVFCallback(Copy_pvCallbackFn);
      7f6:	c4 01       	movw	r24, r8
      7f8:	0e 94 7c 09 	call	0x12f8	; 0x12f8 <TIM0_SetOVFCallback>
+	
+	/* Set timer start value */
+	TIM0_SetValue(TIM0_MAX_TICKS-(u8_l_TotalTicks%TIM0_MAX_TICKS));
      7fc:	8f 2d       	mov	r24, r15
      7fe:	81 95       	neg	r24
      800:	0e 94 54 09 	call	0x12a8	; 0x12a8 <TIM0_SetValue>
+	
+	/* Enable Timer 0 overflow interrupt */
+	//SET_BIT(TIMSK, TIMSK_TOIE0);
+	TIM0_EnableOVFInterrupt();
      804:	0e 94 74 09 	call	0x12e8	; 0x12e8 <TIM0_EnableOVFInterrupt>
+	
+	/* Start Timer */
+	TIM0_Start(u8_l_prescaler);
      808:	8b 2d       	mov	r24, r11
      80a:	0e 94 3c 09 	call	0x1278	; 0x1278 <TIM0_Start>
+	
+	return TIM_OK;
      80e:	80 e0       	ldi	r24, 0x00	; 0
      810:	03 c0       	rjmp	.+6      	; 0x818 <__DATA_REGION_LENGTH__+0x18>
+	Uint16_t u8_l_TotalTicks;
+	float Local_TickTime;
+	
+	/* Check whether timer is Idle or Busy */
+	TIM0_GetState(&u8_l_TimState);
+	if(u8_l_TimState == TIM0_RUNNING) return TIM_NOK;
      812:	81 e0       	ldi	r24, 0x01	; 1
      814:	01 c0       	rjmp	.+2      	; 0x818 <__DATA_REGION_LENGTH__+0x18>
+	
+	/* Get Value in micro seconds */
+	if(u8_a_timeUnit == Seconds)	{u32_a_delay *= SEC_TO_uSEC;}
+	else if(u8_a_timeUnit == mSeconds)	{u32_a_delay *= mSEC_TO_uSEC;}
+	else if(u8_a_timeUnit == uSeconds)	{/* Do Nothing */}
+	else return TIM_NOK;
      816:	81 e0       	ldi	r24, 0x01	; 1
+	
+	/* Start Timer */
+	TIM0_Start(u8_l_prescaler);
+	
+	return TIM_OK;
+}
      818:	0f 90       	pop	r0
      81a:	df 91       	pop	r29
      81c:	cf 91       	pop	r28
@@ -1192,7 +1356,14 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      836:	08 95       	ret
 
 00000838 <HTIM0_AsyncEndDelay>:
+ * 
+ * \return void
+ */
+void HTIM0_AsyncEndDelay()
+{
+	TIM0_Stop();
      838:	0e 94 4a 09 	call	0x1294	; 0x1294 <TIM0_Stop>
+	TIM0_DisableOVFInterrupt();
      83c:	0e 94 78 09 	call	0x12f0	; 0x12f0 <TIM0_DisableOVFInterrupt>
      840:	08 95       	ret
 
@@ -1974,7 +2145,7 @@ en_BuzzerErrorState_t BUZ_SetState(st_Buzzer_t* pst_a_buzzer, en_BuzzerState_t u
      eca:	08 95       	ret
 
 00000ecc <main>:
-#define F_CPU 16000000UL
+#define F_CPU 8000000UL
 
 void main(void)
 {
@@ -2440,6 +2611,12 @@ void main(void)
     1244:	08 95       	ret
 
 00001246 <TIM0_voidInit>:
+/*========================= Function Implementation ========================*/
+en_TIMErrorState_t TIM0_voidInit(en_TIMMode_t u8_a_Mode)
+{
+	Uchar8_t u8_l_T0Mode;
+	
+	switch(u8_a_Mode)
     1246:	81 30       	cpi	r24, 0x01	; 1
     1248:	61 f0       	breq	.+24     	; 0x1262 <TIM0_voidInit+0x1c>
     124a:	28 f0       	brcs	.+10     	; 0x1256 <TIM0_voidInit+0x10>
@@ -2448,109 +2625,272 @@ void main(void)
     1250:	83 30       	cpi	r24, 0x03	; 3
     1252:	29 f0       	breq	.+10     	; 0x125e <TIM0_voidInit+0x18>
     1254:	0f c0       	rjmp	.+30     	; 0x1274 <TIM0_voidInit+0x2e>
+	{
+		case NormalMode:   u8_l_T0Mode = TIM0_NORMAL;	 break;
     1256:	20 e0       	ldi	r18, 0x00	; 0
     1258:	05 c0       	rjmp	.+10     	; 0x1264 <TIM0_voidInit+0x1e>
+		case PWM_Mode:     u8_l_T0Mode = TIM0_PWM;	     break;
+		case CTC_Mode:	   u8_l_T0Mode = TIM0_CTC;		 break;
     125a:	28 e0       	ldi	r18, 0x08	; 8
     125c:	03 c0       	rjmp	.+6      	; 0x1264 <TIM0_voidInit+0x1e>
+		case FastPWM_Mode: u8_l_T0Mode = TIM0_FAST_PWM; break;
     125e:	28 e4       	ldi	r18, 0x48	; 72
     1260:	01 c0       	rjmp	.+2      	; 0x1264 <TIM0_voidInit+0x1e>
+	Uchar8_t u8_l_T0Mode;
+	
+	switch(u8_a_Mode)
+	{
+		case NormalMode:   u8_l_T0Mode = TIM0_NORMAL;	 break;
+		case PWM_Mode:     u8_l_T0Mode = TIM0_PWM;	     break;
     1262:	20 e4       	ldi	r18, 0x40	; 64
+		case FastPWM_Mode: u8_l_T0Mode = TIM0_FAST_PWM; break;
+		default: return TIM_NOK;
+	}
+	
+	/* Clear the timer0 mode bit */
+	TCCR0 &= TIMER0_MODE_MASK;
     1264:	93 b7       	in	r25, 0x33	; 51
     1266:	97 7b       	andi	r25, 0xB7	; 183
     1268:	93 bf       	out	0x33, r25	; 51
+	/* Set the bits to the given value */
+	TCCR0 |= u8_l_T0Mode;
     126a:	83 b7       	in	r24, 0x33	; 51
     126c:	82 2b       	or	r24, r18
     126e:	83 bf       	out	0x33, r24	; 51
+	
+	return TIM_OK;
     1270:	80 e0       	ldi	r24, 0x00	; 0
     1272:	08 95       	ret
+	{
+		case NormalMode:   u8_l_T0Mode = TIM0_NORMAL;	 break;
+		case PWM_Mode:     u8_l_T0Mode = TIM0_PWM;	     break;
+		case CTC_Mode:	   u8_l_T0Mode = TIM0_CTC;		 break;
+		case FastPWM_Mode: u8_l_T0Mode = TIM0_FAST_PWM; break;
+		default: return TIM_NOK;
     1274:	81 e0       	ldi	r24, 0x01	; 1
+	TCCR0 &= TIMER0_MODE_MASK;
+	/* Set the bits to the given value */
+	TCCR0 |= u8_l_T0Mode;
+	
+	return TIM_OK;
+}
     1276:	08 95       	ret
 
 00001278 <TIM0_Start>:
+en_TIMErrorState_t TIM0_Start(en_TIM_CLK_SELECT_t u8_a_prescaler)
+{
+	en_TIMErrorState_t u8_l_ErrorState = TIM_OK;
+	
+	/* Check that prescaler is valid */
+	if(u8_a_prescaler > TIM_NO_CLOCK && u8_a_prescaler <= TIM_EXTERNAL_RISING_EDGE)
     1278:	9f ef       	ldi	r25, 0xFF	; 255
     127a:	98 0f       	add	r25, r24
     127c:	97 30       	cpi	r25, 0x07	; 7
     127e:	40 f4       	brcc	.+16     	; 0x1290 <TIM0_Start+0x18>
+	{
+		/* Clear the prescaler bits */
+		TCCR0 &= TIM0_CLK_MASK;
     1280:	93 b7       	in	r25, 0x33	; 51
     1282:	98 7f       	andi	r25, 0xF8	; 248
     1284:	93 bf       	out	0x33, r25	; 51
+		/* Set prescaler value */
+		TCCR0 |= u8_a_prescaler;
     1286:	93 b7       	in	r25, 0x33	; 51
     1288:	89 2b       	or	r24, r25
     128a:	83 bf       	out	0x33, r24	; 51
+	return TIM_OK;
+}
+
+en_TIMErrorState_t TIM0_Start(en_TIM_CLK_SELECT_t u8_a_prescaler)
+{
+	en_TIMErrorState_t u8_l_ErrorState = TIM_OK;
     128c:	80 e0       	ldi	r24, 0x00	; 0
     128e:	08 95       	ret
+		/* Set prescaler value */
+		TCCR0 |= u8_a_prescaler;
+	}
+	else
+	{
+		u8_l_ErrorState = TIM_NOK;
     1290:	81 e0       	ldi	r24, 0x01	; 1
+	}
+	
+	return u8_l_ErrorState;
+}
     1292:	08 95       	ret
 
 00001294 <TIM0_Stop>:
+
+void TIM0_Stop()
+{
+	/* Clear the prescaler bits */
+	TCCR0 &= TIM0_CLK_MASK;
     1294:	83 b7       	in	r24, 0x33	; 51
     1296:	88 7f       	andi	r24, 0xF8	; 248
     1298:	83 bf       	out	0x33, r24	; 51
+	TCNT0 = 0;
     129a:	12 be       	out	0x32, r1	; 50
+	CLEAR_BIT(TIFR, TIFR_TOV0);
     129c:	88 b7       	in	r24, 0x38	; 56
     129e:	8e 7f       	andi	r24, 0xFE	; 254
     12a0:	88 bf       	out	0x38, r24	; 56
+	u8_gs_OVFCount = 0;
     12a2:	10 92 45 01 	sts	0x0145, r1	; 0x800145 <u8_gs_OVFCount>
     12a6:	08 95       	ret
 
 000012a8 <TIM0_SetValue>:
+}
+
+void TIM0_SetValue(Uchar8_t u8_a_startValue)
+{
+	TCNT0 = u8_a_startValue;
     12a8:	82 bf       	out	0x32, r24	; 50
     12aa:	08 95       	ret
 
 000012ac <TIM0_GetOVF>:
+* \param u8_a_FlagValue reference to a variable to store flag value
+*
+* \return en_TIMErrorState_t
+*/
+en_TIMErrorState_t TIM0_GetOVF(Uchar8_t* u8_a_FlagValue)
+{
     12ac:	fc 01       	movw	r30, r24
+	if(u8_a_FlagValue != NULL)
     12ae:	89 2b       	or	r24, r25
     12b0:	29 f0       	breq	.+10     	; 0x12bc <TIM0_GetOVF+0x10>
+	{
+		*u8_a_FlagValue = GET_BIT(TIFR, TIFR_TOV0);
     12b2:	98 b7       	in	r25, 0x38	; 56
     12b4:	91 70       	andi	r25, 0x01	; 1
     12b6:	90 83       	st	Z, r25
+	else
+	{
+		return TIM_NOK;
+	}
+	
+	return TIM_OK;
     12b8:	80 e0       	ldi	r24, 0x00	; 0
     12ba:	08 95       	ret
+	{
+		*u8_a_FlagValue = GET_BIT(TIFR, TIFR_TOV0);
+	}
+	else
+	{
+		return TIM_NOK;
     12bc:	81 e0       	ldi	r24, 0x01	; 1
+	}
+	
+	return TIM_OK;
+}
     12be:	08 95       	ret
 
 000012c0 <TIM0_ClearOVF>:
+ *
+ * \return void
+ */
+void TIM0_ClearOVF(void)
+{
+	SET_BIT(TIFR, TIFR_TOV0);
     12c0:	88 b7       	in	r24, 0x38	; 56
     12c2:	81 60       	ori	r24, 0x01	; 1
     12c4:	88 bf       	out	0x38, r24	; 56
     12c6:	08 95       	ret
 
 000012c8 <TIM0_GetState>:
+*
+* \return en_TIMErrorState_t
+*/
+en_TIMErrorState_t TIM0_GetState(en_TIMState_t* u8_a_State)
+{
+	if(u8_a_State != NULL)
     12c8:	00 97       	sbiw	r24, 0x00	; 0
     12ca:	61 f0       	breq	.+24     	; 0x12e4 <TIM0_GetState+0x1c>
+	{
+		if (TCCR0 & 0b00000111 != 0) 
     12cc:	03 b6       	in	r0, 0x33	; 51
     12ce:	00 fe       	sbrs	r0, 0
     12d0:	05 c0       	rjmp	.+10     	; 0x12dc <TIM0_GetState+0x14>
+		{
+			*u8_a_State = TIM0_RUNNING;
     12d2:	21 e0       	ldi	r18, 0x01	; 1
     12d4:	fc 01       	movw	r30, r24
     12d6:	20 83       	st	Z, r18
+	else
+	{
+		return TIM_NOK;
+	}
+	
+	return TIM_OK;
     12d8:	80 e0       	ldi	r24, 0x00	; 0
     12da:	08 95       	ret
+		{
+			*u8_a_State = TIM0_RUNNING;
+		}
+		else
+		{
+			*u8_a_State = TIM0_STOPPED;
     12dc:	fc 01       	movw	r30, r24
     12de:	10 82       	st	Z, r1
+	else
+	{
+		return TIM_NOK;
+	}
+	
+	return TIM_OK;
     12e0:	80 e0       	ldi	r24, 0x00	; 0
     12e2:	08 95       	ret
+			*u8_a_State = TIM0_STOPPED;
+		}
+	}
+	else
+	{
+		return TIM_NOK;
     12e4:	81 e0       	ldi	r24, 0x01	; 1
+	}
+	
+	return TIM_OK;
+}
     12e6:	08 95       	ret
 
 000012e8 <TIM0_EnableOVFInterrupt>:
+
+void TIM0_EnableOVFInterrupt(void)
+{
+	SET_BIT(TIMSK, TIMSK_TOIE0);
     12e8:	89 b7       	in	r24, 0x39	; 57
     12ea:	81 60       	ori	r24, 0x01	; 1
     12ec:	89 bf       	out	0x39, r24	; 57
     12ee:	08 95       	ret
 
 000012f0 <TIM0_DisableOVFInterrupt>:
+}
+
+void TIM0_DisableOVFInterrupt(void)
+{
+	CLEAR_BIT(TIMSK, TIMSK_TOIE0);
     12f0:	89 b7       	in	r24, 0x39	; 57
     12f2:	8e 7f       	andi	r24, 0xFE	; 254
     12f4:	89 bf       	out	0x39, r24	; 57
     12f6:	08 95       	ret
 
 000012f8 <TIM0_SetOVFCallback>:
+}
+
+en_TIMErrorState_t TIM0_SetOVFCallback(void (*pv_a_CallbackFn)(void))
+{
+	TIM0_OVFCallbackFn = pv_a_CallbackFn;
     12f8:	90 93 44 01 	sts	0x0144, r25	; 0x800144 <TIM0_OVFCallbackFn+0x1>
     12fc:	80 93 43 01 	sts	0x0143, r24	; 0x800143 <TIM0_OVFCallbackFn>
+}
     1300:	08 95       	ret
 
 00001302 <__vector_11>:
+
+
+/*========================== ISRs =============================*/
+
+ISR(TIM0_OVF_INT)
+{
     1302:	1f 92       	push	r1
     1304:	0f 92       	push	r0
     1306:	0f b6       	in	r0, 0x3f	; 63
@@ -2568,25 +2908,49 @@ void main(void)
     131e:	bf 93       	push	r27
     1320:	ef 93       	push	r30
     1322:	ff 93       	push	r31
+	if(TIM0_OVFCallbackFn != NULL)
     1324:	80 91 43 01 	lds	r24, 0x0143	; 0x800143 <TIM0_OVFCallbackFn>
     1328:	90 91 44 01 	lds	r25, 0x0144	; 0x800144 <TIM0_OVFCallbackFn+0x1>
     132c:	89 2b       	or	r24, r25
     132e:	b1 f0       	breq	.+44     	; 0x135c <__vector_11+0x5a>
+	{
+		/* Delay is complete */
+		if(u8_gs_OVFCount == u8_g_TotalOVF)
     1330:	80 91 45 01 	lds	r24, 0x0145	; 0x800145 <u8_gs_OVFCount>
     1334:	90 91 46 01 	lds	r25, 0x0146	; 0x800146 <u8_g_TotalOVF>
     1338:	89 13       	cpse	r24, r25
     133a:	0d c0       	rjmp	.+26     	; 0x1356 <__vector_11+0x54>
+		{
+			/* Stop the timer */
+			TIM0_Stop();
     133c:	0e 94 4a 09 	call	0x1294	; 0x1294 <TIM0_Stop>
+			
+			/* Reset the OVF counter */
+			u8_gs_OVFCount = 0;
     1340:	10 92 45 01 	sts	0x0145, r1	; 0x800145 <u8_gs_OVFCount>
+			
+			/* Disable OVF interrupt */
+			CLEAR_BIT(TIMSK, TIMSK_TOIE0);
     1344:	89 b7       	in	r24, 0x39	; 57
     1346:	8e 7f       	andi	r24, 0xFE	; 254
     1348:	89 bf       	out	0x39, r24	; 57
+			
+			/* Call the Callback function */
+			TIM0_OVFCallbackFn();
     134a:	e0 91 43 01 	lds	r30, 0x0143	; 0x800143 <TIM0_OVFCallbackFn>
     134e:	f0 91 44 01 	lds	r31, 0x0144	; 0x800144 <TIM0_OVFCallbackFn+0x1>
     1352:	09 95       	icall
     1354:	03 c0       	rjmp	.+6      	; 0x135c <__vector_11+0x5a>
+		}
+		else
+		{
+			/* Increment the overflow count */
+			u8_gs_OVFCount++;
     1356:	8f 5f       	subi	r24, 0xFF	; 255
     1358:	80 93 45 01 	sts	0x0145, r24	; 0x800145 <u8_gs_OVFCount>
+		}
+	}
+}
     135c:	ff 91       	pop	r31
     135e:	ef 91       	pop	r30
     1360:	bf 91       	pop	r27

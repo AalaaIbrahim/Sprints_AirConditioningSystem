@@ -9,7 +9,7 @@
 #define MIN_TEMP				18
 #define MAX_TEMP				35
 
-#define TIME_OUT_SEC			10
+#define TIME_OUT_SEC			5
 
 /*************************************************************************************************************
  * 											User-defined data types
