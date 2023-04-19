@@ -8,8 +8,10 @@
 #include "tim0_interface.h"
 
 /*========================= Global Variables ========================*/
+Uchar8_t u8_g_TotalOVF = 0;
+static Uchar8_t u8_gs_OVFCount = 0;
 
-
+void (*TIM0_OVFCallbackFn)(void) = NULL;
 
 /*========================= Function Implementation ========================*/
 en_TIMErrorState_t TIM0_voidInit(en_TIMMode_t u8_a_Mode)
@@ -59,6 +61,7 @@ void TIM0_Stop()
 	TCCR0 &= TIM0_CLK_MASK;
 	TCNT0 = 0;
 	CLEAR_BIT(TIFR, TIFR_TOV0);
+	u8_gs_OVFCount = 0;
 }
 
 void TIM0_SetValue(Uchar8_t u8_a_startValue)
@@ -125,14 +128,50 @@ en_TIMErrorState_t TIM0_GetState(en_TIMState_t* u8_a_State)
 	return TIM_OK;
 }
 
-
-void TIM0_EnableInterrupt(void)
+void TIM0_EnableOVFInterrupt(void)
 {
 	SET_BIT(TIMSK, TIMSK_TOIE0);
 }
 
-void TIM0_DisableInterrupt(void)
+void TIM0_DisableOVFInterrupt(void)
 {
 	CLEAR_BIT(TIMSK, TIMSK_TOIE0);
 }
+
+en_TIMErrorState_t TIM0_SetOVFCallback(void (*pv_a_CallbackFn)(void))
+{
+	TIM0_OVFCallbackFn = pv_a_CallbackFn;
+}
+
+
+
+/*========================== ISRs =============================*/
+
+ISR(TIM0_OVF_INT)
+{
+	if(TIM0_OVFCallbackFn != NULL)
+	{
+		/* Delay is complete */
+		if(u8_gs_OVFCount == u8_g_TotalOVF)
+		{
+			/* Stop the timer */
+			TIM0_Stop();
+			
+			/* Reset the OVF counter */
+			u8_gs_OVFCount = 0;
+			
+			/* Disable OVF interrupt */
+			CLEAR_BIT(TIMSK, TIMSK_TOIE0);
+			
+			/* Call the Callback function */
+			TIM0_OVFCallbackFn();
+		}
+		else
+		{
+			/* Increment the overflow count */
+			u8_gs_OVFCount++;
+		}
+	}
+}
+
 
