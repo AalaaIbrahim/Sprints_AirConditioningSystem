@@ -11,12 +11,11 @@
 /* prescaler options */
 static Uint16_t arr_gs_prescalers[] = {1,8,64,265,1024};
 
-static Uchar8_t u8_gs_OVFCount = 0, u8_gs_TotalOVF = 0, u8_gs_delayStatusFlag = DELAY_IDLE;
+extern Uchar8_t u8_g_TotalOVF;
 
-void (*TIM0_OVFCallbackFn)(void) = NULL;
 /*================================= Function Implementation =================================*/
 
-en_HTIMErrorState_t TIM0_SyncDelay(Uint32_t u32_a_delay, en_timeUnits_t Copy_timeUnit)
+en_HTIMErrorState_t HTIM0_SyncDelay(Uint32_t u32_a_delay, en_timeUnits_t Copy_timeUnit)
 {
 	Uchar8_t u8_l_prescaler, Local_TotalOverFlows, Local_OverFlowCounter=0, u8_l_OverflowFlag, u8_l_TimState;
 	Uint16_t Local_TotalTicks;
@@ -35,11 +34,10 @@ en_HTIMErrorState_t TIM0_SyncDelay(Uint32_t u32_a_delay, en_timeUnits_t Copy_tim
 	else if(u32_a_delay < MAX_CLK_DEV256_DELAY) {u8_l_prescaler = TIM_DIV_BY_256;}
 	else {u8_l_prescaler = TIM_DIV_BY_1024;}
 	
-	Local_TickTime = arr_gs_prescalers[u8_l_prescaler-1] / 16; //CPU Prescaler
+	Local_TickTime = arr_gs_prescalers[u8_l_prescaler-1]/TIM0_PRESCALER;
 	Local_TotalTicks = (Uint16_t)(u32_a_delay/Local_TickTime);
 	Local_TotalOverFlows = Local_TotalTicks/TIM0_MAX_TICKS;
 	
-	TIM0_DisableInterrupt();
 	/* Initialize timer in normal mode */
 	TIM0_voidInit(NormalMode);
 	
@@ -70,7 +68,7 @@ en_HTIMErrorState_t TIM0_SyncDelay(Uint32_t u32_a_delay, en_timeUnits_t Copy_tim
 	return TIM_OK;
 }
 
-en_HTIMErrorState_t TIM0_AsyncDelay(Uint32_t u32_a_delay, en_timeUnits_t u8_a_timeUnit, void (*Copy_pvCallbackFn)(void))
+en_HTIMErrorState_t HTIM0_AsyncDelay(Uint32_t u32_a_delay, en_timeUnits_t u8_a_timeUnit, void (*Copy_pvCallbackFn)(void))
 {
 	Uchar8_t u8_l_prescaler, u8_l_TimState;
 	Uint16_t u8_l_TotalTicks;
@@ -78,7 +76,7 @@ en_HTIMErrorState_t TIM0_AsyncDelay(Uint32_t u32_a_delay, en_timeUnits_t u8_a_ti
 	
 	/* Check whether timer is Idle or Busy */
 	TIM0_GetState(&u8_l_TimState);
-	if(u8_l_TimState) return TIM_NOK;
+	if(u8_l_TimState == TIM0_RUNNING) return TIM_NOK;
 	
 	/* Get Value in micro seconds */
 	if(u8_a_timeUnit == Seconds)	{u32_a_delay *= SEC_TO_uSEC;}
@@ -93,21 +91,19 @@ en_HTIMErrorState_t TIM0_AsyncDelay(Uint32_t u32_a_delay, en_timeUnits_t u8_a_ti
 	else if(u32_a_delay < MAX_CLK_DEV256_DELAY) {u8_l_prescaler = TIM_DIV_BY_256;}
 	else {u8_l_prescaler = TIM_DIV_BY_1024;}
 	
-	Local_TickTime = arr_gs_prescalers[u8_l_prescaler-1]/16; //CPU Prescaler
+	Local_TickTime = arr_gs_prescalers[u8_l_prescaler-1]/TIM0_PRESCALER;
 	u8_l_TotalTicks = (Uint16_t)(u32_a_delay/Local_TickTime);
-	u8_gs_TotalOVF = u8_l_TotalTicks/TIM0_MAX_TICKS;
+	u8_g_TotalOVF = u8_l_TotalTicks/TIM0_MAX_TICKS;
 	
 	/*Set the callback function */
-	 TIM0_OVFCallbackFn = Copy_pvCallbackFn;
-	/* Enable Timer 0 overflow interrupt */
-	TIM0_EnableInterrupt();
-	//SET_BIT(TIMSK, TIMSK_TOIE0);
+	TIM0_SetOVFCallback(Copy_pvCallbackFn);
 	
 	/* Set timer start value */
 	TIM0_SetValue(TIM0_MAX_TICKS-(u8_l_TotalTicks%TIM0_MAX_TICKS));
 	
-	/* Set the function state as busy */
-	u8_gs_delayStatusFlag = DELAY_BUSY;
+	/* Enable Timer 0 overflow interrupt */
+	//SET_BIT(TIMSK, TIMSK_TOIE0);
+	TIM0_EnableOVFInterrupt();
 	
 	/* Start Timer */
 	TIM0_Start(u8_l_prescaler);
@@ -122,33 +118,8 @@ en_HTIMErrorState_t TIM0_AsyncDelay(Uint32_t u32_a_delay, en_timeUnits_t u8_a_ti
  * 
  * \return void
  */
-void TIM0_AsyncEndDelay()
+void HTIM0_AsyncEndDelay()
 {
 	TIM0_Stop();
-}
-
-/*========================== ISRs =============================*/
-
-ISR(TIM0_OVF_INT)
-{
-	if(TIM0_OVFCallbackFn != NULL)
-	{
-		/* Delay is complete */
-		if(u8_gs_OVFCount == u8_gs_TotalOVF)
-		{
-			/* Stop the timer */
-			TIM0_Stop();
-			
-			/* Reset the OVF counter */
-			u8_gs_OVFCount = 0;
-			
-			/* Call the Callback function */
-			TIM0_OVFCallbackFn();
-		}
-		else
-		{
-			/* Increment the overflow count */
-			u8_gs_OVFCount++;
-		}
-	}
+	TIM0_DisableOVFInterrupt();
 }

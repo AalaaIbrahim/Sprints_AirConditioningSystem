@@ -23,7 +23,7 @@ typedef enum
  * 
  * \return EN_TIMErrorState_t
  */
-en_HTIMErrorState_t TIM0_SyncDelay(Uint32_t u32_a_delay, en_timeUnits_t u8_a_timeUnit);
+en_HTIMErrorState_t HTIM0_SyncDelay(Uint32_t u32_a_delay, en_timeUnits_t u8_a_timeUnit);
 
 
 /**
@@ -35,7 +35,7 @@ en_HTIMErrorState_t TIM0_SyncDelay(Uint32_t u32_a_delay, en_timeUnits_t u8_a_tim
  * 
  * \return en_TIMErrorState_t
  */
-en_HTIMErrorState_t TIM0_AsyncDelay(Uint32_t u32_a_delay, en_timeUnits_t u8_a_timeUnit, void (*Copy_pvCallbackFn)(void));
+en_HTIMErrorState_t HTIM0_AsyncDelay(Uint32_t u32_a_delay, en_timeUnits_t u8_a_timeUnit, void (*Copy_pvCallbackFn)(void));
 
 /**
  * \brief Function to end a delay asynchronously 
@@ -43,7 +43,7 @@ en_HTIMErrorState_t TIM0_AsyncDelay(Uint32_t u32_a_delay, en_timeUnits_t u8_a_ti
  * 
  * \return void
  */
-void TIM0_AsyncEndDelay();
+void HTIM0_AsyncEndDelay();
 
 
 #endif /* HTIMER0_H_ */

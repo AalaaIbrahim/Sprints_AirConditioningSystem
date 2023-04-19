@@ -5,6 +5,7 @@
 /*************************************************************************************************************
  * 													Macros
  ************************************************************************************************************/
+#define TIM0_PRESCALER		16
 
 /* Asynchronous Delay Function States */
 #define  DELAY_BUSY			0
@@ -110,6 +111,10 @@ void TIM0_ClearOVF(void);
  */
 en_TIMErrorState_t TIM0_GetState(en_TIMState_t* u8_a_State);
 
+void TIM0_EnableOVFInterrupt(void);
+
+void TIM0_DisableOVFInterrupt(void);
+
 /**
  * \brief Function to set a function to call when the timer0
  *	      Overflow Interrupt is triggered
@@ -119,7 +124,6 @@ en_TIMErrorState_t TIM0_GetState(en_TIMState_t* u8_a_State);
  */
 en_TIMErrorState_t TIM0_SetOVFCallback(void (*pv_a_CallbackFn)(void));
 
-void TIM0_EnableInterrupt(void);
-void TIM0_DisableInterrupt(void);
+
 
 #endif
